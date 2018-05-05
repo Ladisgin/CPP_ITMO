@@ -3,6 +3,7 @@
 //
 
 #include <string>
+#include <algorithm>
 #include "big_integer.h"
 #include "gtest/gtest.h"
 
