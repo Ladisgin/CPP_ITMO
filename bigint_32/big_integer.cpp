@@ -11,7 +11,7 @@ typedef uint64_t u64;
 typedef int64_t i64;
 
 big_integer::big_integer()
-        : sign(true), data(0) {}
+        : sign(true), data(1, 0) {}
 
 big_integer::big_integer(big_integer const &other) = default;
 
@@ -73,11 +73,11 @@ big_integer::~big_integer() = default;
 big_integer &big_integer::operator=(big_integer const &other) = default;
 
 bool big_integer::is_zero() const {
-    return (data.empty()) || (data.size() == 1 && data[0] == 0);
+    return (data.size() == 1 && data[0] == 0);
 }
 
 int big_integer::compare_by_abs(big_integer const &other) const {
-    if (this->is_zero() && other.is_zero()) { return 0; }
+    //if (this->is_zero() && other.is_zero()) { return 0; }
     if (this->data.size() > other.data.size()) { return 1; }
     if (this->data.size() < other.data.size()) { return -1; }
     for (size_t i = this->data.size(); i > 0; i--) {
@@ -129,10 +129,11 @@ bool operator<=(big_integer const &left, big_integer const &right) {
 
 
 void big_integer::clean() {
-    while (!data.empty() && data.back() == 0) {
+    while (data.size() > 1 && data.back() == 0) {
         data.pop_back();
     }
     if (data.empty()) {
+        data.resize(1, 0);
         sign = true;
     }
 }
@@ -278,7 +279,7 @@ big_integer &big_integer::operator++() {
 
 big_integer big_integer::operator++(int) {
     big_integer ret(*this);
-    ++ret;
+    ++(*this);
     return ret;
 }
 
@@ -305,7 +306,7 @@ big_integer &big_integer::operator--() {
 
 big_integer big_integer::operator--(int) {
     big_integer ret(*this);
-    --ret;
+    --(*this);
     return ret;
 }
 
@@ -428,11 +429,11 @@ big_integer &big_integer::operator/=(big_integer const &rhs) {
         res.data.resize(m);
     }
     u64 result = 0;
-    for (size_t i = m; i != 0; i--) {
+    for (size_t i = m; !this->is_zero(); i--) {
         if (n + i - 1 < this->data.size()) {
             result = ((static_cast<u64>(this->data[n + i - 1])
                     << std::numeric_limits<uint32_t>::digits) +
-                      this->data[n + i - 2]) / static_cast<u64>(divider.data.back());
+                      this->data[n + i - 2]) / divider.data.back();
         } else {
             result = static_cast<u64>(this->data[n + i - 2] / divider.data.back());
         }
@@ -441,9 +442,6 @@ big_integer &big_integer::operator/=(big_integer const &rhs) {
         while (*this < 0) {
             res.data[i - 1]--;
             *this += divider << (std::numeric_limits<uint32_t>::digits * (i - 1));
-        }
-        if(this->is_zero()){
-            break;
         }
     }
     res.sign = flag_sign;
@@ -468,8 +466,9 @@ big_integer operator%(big_integer left, const big_integer &right) {
 
 void big_integer::code() {
     if (!sign) {
-        for (size_t i = 0; i != data.size(); ++i)
+        for (size_t i = 0; i != data.size(); ++i) {
             data[i] = ~data[i];
+        }
         add_uint32_t(1);
     }
 }
@@ -477,8 +476,9 @@ void big_integer::code() {
 void big_integer::decode() {
     if (!sign) {
         sub_uint32_t(1);
-        for (size_t i = 0; i != data.size(); ++i)
+        for (size_t i = 0; i != data.size(); ++i) {
             data[i] = ~data[i];
+        }
     }
 }
 
@@ -510,9 +510,6 @@ big_integer &big_integer::operator|=(const big_integer &rhs) {
     for (size_t i = 0; i != that.data.size(); i++) {
         this->data[i] |= that.data[i];
     }
-    for (size_t i = that.data.size(); i < this->data.size(); i++) {
-        this->data[i] |= 0;
-    }
     this->sign = this->sign && that.sign;
     this->decode();
     this->clean();
@@ -533,9 +530,6 @@ big_integer &big_integer::operator^=(const big_integer &rhs) {
     that.code();
     for (size_t i = 0; i != that.data.size(); i++) {
         this->data[i] ^= that.data[i];
-    }
-    for (size_t i = that.data.size(); i < this->data.size(); i++) {
-        this->data[i] ^= 0;
     }
     this->sign = !(this->sign ^ that.sign);
     this->decode();
@@ -561,7 +555,7 @@ std::string to_string(big_integer const &a) {
     }
     std::string res;
     big_integer tmp(a);
-    while (tmp != 0) {
+    while (!tmp.is_zero()) {
         uint32_t digit = tmp.div_uint32_t(10);
         res.push_back(static_cast<char>(digit + '0'));
     }
@@ -573,8 +567,7 @@ std::string to_string(big_integer const &a) {
 }
 
 std::ostream &operator<<(std::ostream &os, big_integer const &a) {
-    os << to_string(a);
-    return os;
+    return os << to_string(a);
 }
 
 #undef u64
