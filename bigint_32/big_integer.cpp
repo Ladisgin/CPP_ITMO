@@ -3,6 +3,7 @@
 //
 
 #include <string>
+#include <algorithm>
 #include "big_integer.h"
 #include "gtest/gtest.h"
 
@@ -390,6 +391,12 @@ uint32_t big_integer::div_uint32_t(uint32_t const x) {
 big_integer &big_integer::operator/=(big_integer const &rhs) {
     bool flag_sign = this->sign == rhs.sign;
     int compare = this->compare_by_abs(rhs);
+    if (this->is_zero()) {
+        return *this;
+    }
+    if (rhs.is_zero()) {
+        return *this;
+    }
     if (compare == 0) {
         sign = flag_sign;
         *this = 1;
@@ -435,6 +442,9 @@ big_integer &big_integer::operator/=(big_integer const &rhs) {
             res.data[i - 1]--;
             *this += divider << (std::numeric_limits<uint32_t>::digits * (i - 1));
         }
+        if(this->is_zero()){
+            break;
+        }
     }
     res.sign = flag_sign;
     res.clean();
@@ -474,9 +484,6 @@ void big_integer::decode() {
 
 big_integer &big_integer::operator&=(const big_integer &rhs) {
     big_integer that(rhs);
-    if (that.data.size() > this->data.size()) {
-        this->data.insert(this->data.end(), that.data.size() - this->data.size(), 0);
-    }
     this->code();
     that.code();
     for (size_t i = 0; i != that.data.size(); i++) {
