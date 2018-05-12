@@ -420,12 +420,10 @@ big_integer &big_integer::operator/=(big_integer const &rhs) {
     size_t m = this->data.size() - divider.data.size();
     size_t n = divider.data.size();
     big_integer res;
+    res.data.resize(m + 1);
     if (*this >= divider << (std::numeric_limits<uint32_t>::digits * m)) {
         *this -= divider << (std::numeric_limits<uint32_t>::digits * m);
-        res.data.resize(m + 1);
         res.data.back() = 1;
-    } else {
-        res.data.resize(m);
     }
     u64 result = 0;
     for (size_t i = m; i != 0; i--) {
