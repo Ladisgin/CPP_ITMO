@@ -7,9 +7,6 @@
 #include "big_integer.h"
 #include "gtest/gtest.h"
 
-// delete it
-typedef uint64_t u64;
-typedef int64_t i64;
 
 big_integer::big_integer()
         : sign(true), data(1, 0) {}
@@ -20,16 +17,16 @@ big_integer::big_integer(int a) : sign(a >= 0), data(1, static_cast<uint32_t>(ab
 }
 
 void big_integer::add_uint32_t(uint32_t const x) {
-    u64 result = data[0] + static_cast<u64>(x);
+    uint64_t result = data[0] + static_cast<uint64_t>(x);
     data[0] = static_cast<uint32_t>(result);
     uint32_t carry = static_cast<uint32_t>(result >> std::numeric_limits<uint32_t>::digits);
     uint32_t position = 1;
     while (carry != 0) {
         if (position == data.size()) {
-            result = static_cast<u64>(carry);
+            result = static_cast<uint64_t>(carry);
             data.push_back(static_cast<uint32_t>(result));
         } else {
-            result = static_cast<u64>(data[position]) + carry;
+            result = static_cast<uint64_t>(data[position]) + carry;
             data[position] = static_cast<uint32_t>(result);
         }
         carry = static_cast<uint32_t>(result >> std::numeric_limits<uint32_t>::digits);
@@ -38,12 +35,12 @@ void big_integer::add_uint32_t(uint32_t const x) {
 }
 
 void big_integer::mul_uint32_t(uint32_t const x) {
-    u64 mul = static_cast<uint32_t>(x);
-    u64 carry = 0;
-    u64 result = 0;
+    uint64_t mul = static_cast<uint32_t>(x);
+    uint64_t carry = 0;
+    uint64_t result = 0;
     for (size_t i = 0; i < data.size() || carry > 0; i++) {
         if (i == data.size()) {
-            result = static_cast<u64>(carry);
+            result = static_cast<uint64_t>(carry);
             data.push_back(static_cast<uint32_t>(result));
         } else {
             result = mul * data[i] + carry;
@@ -77,14 +74,16 @@ bool big_integer::is_zero() const {
 }
 
 int big_integer::compare_by_abs(big_integer const &other) const {
-    //if (this->is_zero() && other.is_zero()) { return 0; }
     if (this->data.size() > other.data.size()) { return 1; }
     if (this->data.size() < other.data.size()) { return -1; }
-    for (size_t i = this->data.size(); i > 0; i--) {
-        if (this->data[i - 1] > other.data[i - 1]) { return 1; }
-        if (this->data[i - 1] < other.data[i - 1]) { return -1; }
+    auto it = std::mismatch(this->data.rbegin(), this->data.rend(), other.data.rbegin());
+    if (it.first == this->data.rend()) {
+        return 0;
     }
-    return 0;
+    if (*it.first > *it.second) {
+        return 1;
+    }
+    return -1;
 }
 
 int big_integer::compare(big_integer const &other) const {
@@ -128,7 +127,7 @@ bool operator<=(big_integer const &left, big_integer const &right) {
 }
 
 
-void big_integer::clean() {
+void big_integer::remove_lead_zeros() {
     while (data.size() > 1 && data.back() == 0) {
         data.pop_back();
     }
@@ -141,38 +140,38 @@ void big_integer::clean() {
 
 void big_integer::add_unsigned(big_integer const &rhs) {
     uint32_t carry = 0;
-    u64 result = 0;
+    uint64_t result = 0;
     size_t max_range = std::max(this->data.size(), rhs.data.size());
     for (size_t i = 0; i < max_range || carry > 0; i++) {
         if (i == this->data.size()) {
             if (i < rhs.data.size()) {
-                result = static_cast<u64>(carry) + rhs.data[i];
+                result = static_cast<uint64_t>(carry) + rhs.data[i];
             } else {
-                result = static_cast<u64>(carry);
+                result = static_cast<uint64_t>(carry);
             }
             this->data.push_back(static_cast<uint32_t>(result));
         } else {
             if (i < rhs.data.size()) {
-                result = static_cast<u64>(carry) + this->data[i] + rhs.data[i];
+                result = static_cast<uint64_t>(carry) + this->data[i] + rhs.data[i];
             } else {
-                result = static_cast<u64>(carry) + this->data[i];
+                result = static_cast<uint64_t>(carry) + this->data[i];
             }
             this->data[i] = static_cast<uint32_t>(result);
         }
         carry = static_cast<uint32_t>(result >> std::numeric_limits<uint32_t>::digits);
     }
-    this->clean();
+    this->remove_lead_zeros();
 }
 
 void big_integer::sub_uint32_t(uint32_t const x) {
     uint32_t sub = x;
-    i64 result = 0;
+    int64_t result = 0;
     bool loan = false;
-    result = static_cast<i64>(data[0]) - sub;
+    result = static_cast<int64_t>(data[0]) - sub;
     if (result >= 0) {
         data[0] = static_cast<uint32_t>(result);
     } else {
-        result += (static_cast<u64>(std::numeric_limits<uint32_t>::max()) + 1);
+        result += (static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()) + 1);
         data[0] = static_cast<uint32_t>(result);
         loan = true;
     }
@@ -188,9 +187,9 @@ void big_integer::sub_uint32_t(uint32_t const x) {
 
 void big_integer::sub_unsigned(big_integer const &rhs) {
     bool loan = false;
-    i64 result = 0;
-    i64 minuend = 0;
-    i64 sub = 0;
+    int64_t result = 0;
+    int64_t minuend = 0;
+    int64_t sub = 0;
     for (size_t i = 0; i != this->data.size(); i++) {
         minuend = this->data[i];
         if (i < rhs.data.size()) {
@@ -207,7 +206,7 @@ void big_integer::sub_unsigned(big_integer const &rhs) {
         }
         result = minuend - sub;
         if (result < 0) {
-            result += (static_cast<u64>(std::numeric_limits<uint32_t>::max()) + 1);
+            result += (static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()) + 1);
             loan = true;
         }
         this->data[i] = static_cast<uint32_t>(result);
@@ -258,7 +257,7 @@ big_integer &big_integer::operator+=(big_integer const &rhs) {
             this->sign = rhs.sign;
         }
     }
-    this->clean();
+    this->remove_lead_zeros();
     return *this;
 }
 
@@ -286,7 +285,7 @@ big_integer big_integer::operator++(int) {
 
 big_integer &big_integer::operator-=(big_integer const &rhs) {
     *this += -rhs;
-    this->clean();
+    this->remove_lead_zeros();
     return *this;
 }
 
@@ -319,7 +318,7 @@ big_integer &big_integer::operator<<=(int shift) {
         }
         data[0] <<= shl;
     }
-    clean();
+    remove_lead_zeros();
     return *this;
 }
 
@@ -341,7 +340,7 @@ big_integer &big_integer::operator>>=(int shift) {
         }
         data[data.size() - 1] >>= shr;
     }
-    clean();
+    remove_lead_zeros();
     if (*this < 0) {
         add_uint32_t(1);
     }
@@ -357,7 +356,7 @@ big_integer operator>>(big_integer number, int shift) {
 big_integer big_integer::mul_uint32_t_return(uint32_t const x) const {
     big_integer ret(*this);
     ret.mul_uint32_t(x);
-    ret.clean();
+    ret.remove_lead_zeros();
     return ret;
 }
 
@@ -378,13 +377,13 @@ big_integer operator*(big_integer left, const big_integer &right) {
 
 uint32_t big_integer::div_uint32_t(uint32_t const x) {
     uint32_t carry = 0;
-    u64 result = 0;
+    uint64_t result = 0;
     for (size_t i = data.size(); i > 0; i--) {
-        result = data[i - 1] + carry * (static_cast<u64>(std::numeric_limits<uint32_t>::max()) + 1);
+        result = data[i - 1] + carry * (static_cast<uint64_t>(std::numeric_limits<uint32_t>::max()) + 1);
         data[i - 1] = static_cast<uint32_t>(result / x);
         carry = static_cast<uint32_t>(result % x);
     }
-    clean();
+    remove_lead_zeros();
     return carry;
 }
 
@@ -427,14 +426,14 @@ big_integer &big_integer::operator/=(big_integer const &rhs) {
     } else {
         res.data.resize(m);
     }
-    u64 result = 0;
+    uint64_t result = 0;
     for (size_t i = m; !this->is_zero() && (i != 0); i--) {
         if (n + i - 1 < this->data.size()) {
-            result = ((static_cast<u64>(this->data[n + i - 1])
+            result = ((static_cast<uint64_t>(this->data[n + i - 1])
                     << std::numeric_limits<uint32_t>::digits) +
                       this->data[n + i - 2]) / divider.data.back();
         } else {
-            result = static_cast<u64>(this->data[n + i - 2] / divider.data.back());
+            result = static_cast<uint64_t>(this->data[n + i - 2] / divider.data.back());
         }
         res.data[i - 1] = std::min(static_cast<uint32_t>(result), std::numeric_limits<uint32_t>::max());
         *this -= divider.mul_uint32_t_return(res.data[i - 1]) << (std::numeric_limits<uint32_t>::digits * (i - 1));
@@ -444,7 +443,7 @@ big_integer &big_integer::operator/=(big_integer const &rhs) {
         }
     }
     res.sign = flag_sign;
-    res.clean();
+    res.remove_lead_zeros();
     return *this = res;
 }
 
@@ -463,11 +462,10 @@ big_integer operator%(big_integer left, const big_integer &right) {
 }
 
 
-// for-each based loop
 void big_integer::code() {
     if (!sign) {
-        for (size_t i = 0; i != data.size(); ++i) {
-            data[i] = ~data[i];
+        for (auto &i : data) {
+            i = ~i;
         }
         add_uint32_t(1);
     }
@@ -491,7 +489,7 @@ big_integer &big_integer::operator&=(const big_integer &rhs) {
     }
     this->sign = this->sign || that.sign;
     this->decode();
-    this->clean();
+    this->remove_lead_zeros();
     return *this;
 }
 
@@ -512,7 +510,7 @@ big_integer &big_integer::operator|=(const big_integer &rhs) {
     }
     this->sign = this->sign && that.sign;
     this->decode();
-    this->clean();
+    this->remove_lead_zeros();
     return *this;
 }
 
@@ -533,7 +531,7 @@ big_integer &big_integer::operator^=(const big_integer &rhs) {
     }
     this->sign = !(this->sign ^ that.sign);
     this->decode();
-    this->clean();
+    this->remove_lead_zeros();
     return *this;
 }
 
@@ -570,5 +568,4 @@ std::ostream &operator<<(std::ostream &os, big_integer const &a) {
     return os << to_string(a);
 }
 
-#undef u64
-#undef i64
+#undef int64_t

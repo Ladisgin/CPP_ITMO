@@ -15,7 +15,6 @@ private:
     bool sign;
     std::vector<uint32_t> data;
 
-
     void mul_uint32_t(uint32_t);
 
     void add_uint32_t(uint32_t);
@@ -24,13 +23,11 @@ private:
 
     bool is_zero() const;
 
-    // std::mismatch
     int compare_by_abs(big_integer const &) const;
 
     int compare(big_integer const &) const;
 
-    // bad name
-    void clean();
+    void remove_lead_zeros();
 
     void add_unsigned(big_integer const &);
 
@@ -51,7 +48,7 @@ public:
 
     big_integer(int a);
 
-    explicit big_integer(std::string const &str);
+    big_integer(std::string const &str);
 
     ~big_integer();
 
