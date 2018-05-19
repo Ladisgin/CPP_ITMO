@@ -7,6 +7,7 @@
 #include "big_integer.h"
 #include "gtest/gtest.h"
 
+// delete it
 typedef uint64_t u64;
 typedef int64_t i64;
 
@@ -363,8 +364,8 @@ big_integer big_integer::mul_uint32_t_return(uint32_t const x) const {
 
 big_integer &big_integer::operator*=(big_integer const &rhs) {
     this->sign = this->sign == rhs.sign;
-    big_integer result(this->mul_uint32_t_return(rhs.data[0]));
-    for (size_t i = 1; i != rhs.data.size(); ++i) {
+    big_integer result;
+    for (size_t i = 0; i != rhs.data.size(); ++i) {
         result += this->mul_uint32_t_return(rhs.data[i]) << (std::numeric_limits<uint32_t>::digits * i);
     }
     return *this = result;
@@ -462,6 +463,7 @@ big_integer operator%(big_integer left, const big_integer &right) {
 }
 
 
+// for-each based loop
 void big_integer::code() {
     if (!sign) {
         for (size_t i = 0; i != data.size(); ++i) {

@@ -16,18 +16,20 @@ private:
     std::vector<uint32_t> data;
 
 
-    void mul_uint32_t(uint32_t const);
+    void mul_uint32_t(uint32_t);
 
-    void add_uint32_t(uint32_t const);
+    void add_uint32_t(uint32_t);
 
-    void sub_uint32_t(uint32_t const);
+    void sub_uint32_t(uint32_t);
 
     bool is_zero() const;
 
+    // std::mismatch
     int compare_by_abs(big_integer const &) const;
 
     int compare(big_integer const &) const;
 
+    // bad name
     void clean();
 
     void add_unsigned(big_integer const &);
@@ -38,9 +40,9 @@ private:
 
     void decode();
 
-    big_integer mul_uint32_t_return(uint32_t const x) const;
+    big_integer mul_uint32_t_return(uint32_t x) const;
 
-    uint32_t div_uint32_t(uint32_t const x);
+    uint32_t div_uint32_t(uint32_t x);
 
 public:
     big_integer();
