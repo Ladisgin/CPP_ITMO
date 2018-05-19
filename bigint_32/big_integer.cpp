@@ -15,8 +15,7 @@ big_integer::big_integer()
 
 big_integer::big_integer(big_integer const &other) = default;
 
-big_integer::big_integer(int a) : sign(a >= 0) {
-    data.assign(1, static_cast<uint32_t>(abs((long long int) a)));
+big_integer::big_integer(int a) : sign(a >= 0), data(1, static_cast<uint32_t>(abs((long long int) a))) {
 }
 
 void big_integer::add_uint32_t(uint32_t const x) {
@@ -311,8 +310,7 @@ big_integer big_integer::operator--(int) {
 }
 
 big_integer &big_integer::operator<<=(int shift) {
-    uint32_t insert = static_cast<uint32_t>(shift) / std::numeric_limits<uint32_t>::digits;
-    data.insert(data.begin(), insert, 0);
+    data.insert(data.begin(), (shift / std::numeric_limits<uint32_t>::digits), 0);
     uint32_t shl = static_cast<uint32_t>(shift) % std::numeric_limits<uint32_t>::digits;
     if (shl != 0) {
         for (size_t i = data.size() - 1; i != 0; i--) {
@@ -429,7 +427,7 @@ big_integer &big_integer::operator/=(big_integer const &rhs) {
         res.data.resize(m);
     }
     u64 result = 0;
-    for (size_t i = m; !this->is_zero(); i--) {
+    for (size_t i = m; !this->is_zero() && (i != 0); i--) {
         if (n + i - 1 < this->data.size()) {
             result = ((static_cast<u64>(this->data[n + i - 1])
                     << std::numeric_limits<uint32_t>::digits) +
