@@ -11,7 +11,7 @@
 
 class my_vector {
 private:
-    static const size_t SMALL_SIZE = 1;
+    static const size_t SMALL_SIZE = 2;
     union {
         uint32_t small_data[SMALL_SIZE];
         uint32_t *big_data;
@@ -31,6 +31,8 @@ public:
     void resize(size_t sz, uint32_t val);
 
     my_vector(size_t sz, uint32_t val);
+
+    my_vector(size_t sz);
 
     my_vector();
 

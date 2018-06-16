@@ -316,7 +316,6 @@ big_integer big_integer::operator--(int) {
 }
 
 big_integer &big_integer::operator<<=(int shift) {
-    //data.insert(data.begin(), (shift / std::numeric_limits<uint32_t>::digits), 0);
     size_t s = (shift / std::numeric_limits<uint32_t>::digits);
     my_vector new_vector(data.size() + s);
     for (size_t i = 0; i < s; i++) {
