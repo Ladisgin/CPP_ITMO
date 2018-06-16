@@ -7,6 +7,7 @@
 
 #include <string>
 #include <limits>
+#include <memory>
 
 class my_vector {
 private:
@@ -15,17 +16,14 @@ private:
         uint32_t small_data[SMALL_SIZE];
         uint32_t *big_data;
     } union_data;
-    uint32_t *_data;
+    std::shared_ptr<uint32_t *> _data;
     size_t data_capacity;
     size_t data_size;
     bool is_big;
-    size_t *copy_count;
 
     void reserve(size_t sz);
 
     void copy_check();
-
-    void minus_copy_count();
 
 public:
     void resize(size_t sz);
@@ -34,13 +32,9 @@ public:
 
     my_vector(size_t sz, uint32_t val);
 
-    my_vector(size_t sz);
-
     my_vector();
 
     my_vector(my_vector const &other);
-
-    ~my_vector();
 
     size_t size() const;
 
@@ -57,8 +51,6 @@ public:
     void pop_back();
 
     bool empty();
-
-    my_vector copy() const;
 
     my_vector &operator=(my_vector const &other);
 };
