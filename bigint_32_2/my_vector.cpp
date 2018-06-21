@@ -4,141 +4,147 @@
 
 #include "my_vector.h"
 
-void my_vector::reserve(size_t sz) {
-    copy_check();
-    if (sz <= SMALL_SIZE) {
-        for (int i = 0; i < sz; i++) {
-            union_data.small_data[i] = (*_data)[i];
+data_struct::data_struct() : size(0), capacity(SMALL_SIZE), is_big(false) {
+}
+
+data_struct::~data_struct() {
+    if (is_big) {
+        delete[] union_data.big_data;
+    }
+}
+
+void data_struct::ensure_capacity(size_t sz) {
+    if (sz > capacity) {
+        capacity = (sz * 2);
+        auto new_int = new uint32_t[capacity];
+        if (is_big) {
+            std::copy(union_data.big_data, union_data.big_data + size, new_int);
+        } else {
+            std::copy(union_data.small_data, union_data.small_data + size, new_int);
         }
-        _data = std::make_shared<uint32_t *>(union_data.small_data);
-        data_capacity = SMALL_SIZE;
+        if (is_big) {
+            delete[] union_data.big_data;
+        }
+        union_data.big_data = new_int;
+        is_big = true;
+    } else if (sz <= SMALL_SIZE && is_big) {
+        capacity = SMALL_SIZE;
+        auto old_data_pointer = union_data.big_data;
+        std::copy(old_data_pointer, old_data_pointer + SMALL_SIZE, union_data.small_data);
+        delete[] old_data_pointer;
         is_big = false;
     }
-    if (data_capacity < sz || data_capacity > 3 * sz) {
-        if (data_capacity > 3 * sz) {
-            data_capacity = 2 * sz;
-        } else {
-            data_capacity = std::max(data_capacity * 2, sz);
-        }
-        auto new_data = static_cast <uint32_t *> (operator new(sizeof(uint32_t) * data_capacity));
-        if (_data != nullptr) {
-            std::copy(*_data, *_data + data_size, new_data);
-        }
-        union_data.big_data = new_data;
-        _data = std::make_shared<uint32_t *>(union_data.big_data);
-        is_big = true;
+    size = sz;
+}
+
+
+//main part
+void my_vector::data_copy() {
+    if (!_data.unique()) {
+        auto old_data_pointer = _data->union_data.big_data;
+        size_t sz = _data->size;
+        _data.reset(new data_struct());
+        _data->ensure_capacity(sz);
+        std::copy(old_data_pointer, old_data_pointer + sz, _data->union_data.big_data);
     }
 }
 
-void my_vector::resize(size_t sz) {
-    if (sz <= SMALL_SIZE && data_capacity <= SMALL_SIZE) {
-        _data = std::make_shared<uint32_t *>(union_data.small_data);
-        data_capacity = SMALL_SIZE;
-        is_big = false;
-    }
 
-    if (data_capacity < sz || data_capacity > 3 * sz) {
-        if (data_capacity > 3 * sz) {
-            data_capacity = 2 * sz;
-        } else {
-            data_capacity = std::max(data_capacity * 2, sz);
-        }
-        union_data.big_data = static_cast <uint32_t *> (operator new(sizeof(uint32_t) * data_capacity));
-        _data = std::make_shared<uint32_t *>(union_data.big_data);
-        is_big = true;
-    }
-    data_size = sz;
-}
-
-void my_vector::resize(size_t sz, uint32_t val) {
-    resize(sz);
-    for (int i = 0; i < sz; i++) {
-        (*_data)[i] = val;
+void my_vector::data_without_copy() {
+    if (!_data.unique()) {
+        _data.reset(new data_struct());
     }
 }
 
-my_vector::my_vector(size_t sz, uint32_t val) : data_capacity(0), data_size(0), is_big(false) {
+my_vector::my_vector() {
+    _data.reset(new data_struct());
+}
+
+my_vector::my_vector(size_t sz) {
+    _data.reset(new data_struct());
+    _data->ensure_capacity(sz);
+}
+
+my_vector::my_vector(size_t sz, uint32_t val) {
+    _data.reset(new data_struct());
     resize(sz, val);
 }
 
-my_vector::my_vector(size_t sz) : data_capacity(0), data_size(0), is_big(false) {
-    resize(sz);
+void my_vector::resize(size_t sz) {
+    data_without_copy();
+    _data->ensure_capacity(sz);
 }
 
-my_vector::my_vector() : data_capacity(0), data_size(0), is_big(false) {
-    resize(0);
-}
-
-my_vector::my_vector(my_vector const &other) {
-    *this = other;
+void my_vector::resize(size_t sz, uint32_t val) {
+    data_without_copy();
+    _data->ensure_capacity(sz);
+    if (_data->is_big) {
+        for (size_t i = 0; i < sz; i++) {
+            _data->union_data.big_data[i] = val;
+        }
+    } else {
+        for (size_t i = 0; i < sz; i++) {
+            _data->union_data.small_data[i] = val;
+        }
+    }
 }
 
 size_t my_vector::size() const {
-    return data_size;
-}
-
-uint32_t my_vector::back() const {
-    return (*_data)[data_size - 1];
-}
-
-uint32_t &my_vector::back() {
-    copy_check();
-    return (*_data)[data_size - 1];
+    return _data->size;
 }
 
 void my_vector::push_back(uint32_t val) {
-    copy_check();
-    reserve(data_size + 1);
-    data_size++;
-    back() = val;
+    data_copy();
+    _data->ensure_capacity(_data->size + 1);
+    if (_data->is_big) {
+        _data->union_data.big_data[_data->size - 1] = val;
+    } else {
+        _data->union_data.small_data[_data->size - 1] = val;
+    }
 }
 
 uint32_t my_vector::operator[](size_t pos) const {
-    return (*_data)[pos];
+    if (_data->is_big) {
+        return _data->union_data.big_data[pos];
+    } else {
+        return _data->union_data.small_data[pos];
+    }
 }
 
 uint32_t &my_vector::operator[](size_t pos) {
-    copy_check();
-    return (*_data)[pos];
+    data_copy();
+    if (_data->is_big) {
+        return _data->union_data.big_data[pos];
+    } else {
+        return _data->union_data.small_data[pos];
+    }
 }
 
 void my_vector::pop_back() {
-    copy_check();
-    reserve(data_size - 1);
-    data_size--;
-}
-
-bool my_vector::empty() {
-    return data_size == 0;
+    data_copy();
+    _data->ensure_capacity(_data->size - 1);
 }
 
 my_vector &my_vector::operator=(my_vector const &other) {
-    if (other.data_size > SMALL_SIZE) {
+    other._data->ensure_capacity(other._data->size);
+    if (other._data->is_big) {
         _data = other._data;
-        data_capacity = other.data_capacity;
-        data_size = other.data_size;
-        is_big = other.is_big;
     } else {
-        if (_data != nullptr) {
-            std::copy(*other._data, *other._data + other.data_size, union_data.small_data);
-        }
-        data_size = other.data_size;
-        _data = std::make_shared<uint32_t *>(union_data.small_data);
-        data_capacity = SMALL_SIZE;
-        is_big = false;
+        _data->ensure_capacity(other._data->size);
+        std::copy(other._data->union_data.small_data, other._data->union_data.small_data + other._data->size,
+                  _data->union_data.small_data);
     }
     return *this;
 }
 
-void my_vector::copy_check() {
-    if (!_data.unique()) {
-        data_capacity = data_size;
-        auto new_data = static_cast <uint32_t *> (operator new(sizeof(uint32_t) * data_capacity));
-        if (_data != nullptr) {
-            std::copy(*_data, *_data + data_size, new_data);
-        }
-        union_data.big_data = new_data;
-        _data = std::make_shared<uint32_t *>(union_data.big_data);
-        is_big = true;
-    }
+uint32_t my_vector::back() const {
+    return operator[](_data->size - 1);
+}
+
+uint32_t &my_vector::back() {
+    return operator[](_data->size - 1);
+}
+
+bool my_vector::empty() const {
+    return size() == 0;
 }

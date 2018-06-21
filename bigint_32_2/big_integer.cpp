@@ -12,7 +12,6 @@ big_integer::big_integer()
         : sign(true), data(1, 0) {}
 
 big_integer::big_integer(big_integer const &other) {
-
     *this = big_integer();
     sign = other.sign;
     data = other.data;
@@ -316,8 +315,9 @@ big_integer big_integer::operator--(int) {
 }
 
 big_integer &big_integer::operator<<=(int shift) {
+    //data.insert(data.begin(), (shift / std::numeric_limits<uint32_t>::digits), 0);
     size_t s = (shift / std::numeric_limits<uint32_t>::digits);
-    my_vector new_vector(data.size() + s);
+    my_vector new_vector(data.size() + s, 0);
     for (size_t i = 0; i < s; i++) {
         new_vector[i] = 0;
     }

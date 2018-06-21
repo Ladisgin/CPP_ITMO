@@ -9,40 +9,44 @@
 #include <limits>
 #include <memory>
 
-class my_vector {
-private:
-    static const size_t SMALL_SIZE = 2;
+struct data_struct {
+    static const size_t SMALL_SIZE = 1;
     union {
         uint32_t small_data[SMALL_SIZE];
         uint32_t *big_data;
     } union_data;
-    std::shared_ptr<uint32_t *> _data;
-    size_t data_capacity;
-    size_t data_size;
+
+    size_t size;
+    size_t capacity;
     bool is_big;
 
-    void reserve(size_t sz);
+    data_struct();
 
-    void copy_check();
+    ~data_struct();
 
+    void ensure_capacity(size_t new_size);
+};
+
+
+class my_vector {
+private:
+    std::shared_ptr<data_struct> _data;
 public:
+    void data_copy();
+
+    void data_without_copy();
+
+    my_vector();
+
+    my_vector(size_t sz);
+
+    my_vector(size_t sz, uint32_t val);
+
     void resize(size_t sz);
 
     void resize(size_t sz, uint32_t val);
 
-    my_vector(size_t sz, uint32_t val);
-
-    my_vector(size_t sz);
-
-    my_vector();
-
-    my_vector(my_vector const &other);
-
     size_t size() const;
-
-    uint32_t back() const;
-
-    uint32_t &back();
 
     void push_back(uint32_t val);
 
@@ -52,9 +56,13 @@ public:
 
     void pop_back();
 
-    bool empty();
-
     my_vector &operator=(my_vector const &other);
+
+    uint32_t back() const;
+
+    uint32_t &back();
+
+    bool empty() const;
 };
 
 
