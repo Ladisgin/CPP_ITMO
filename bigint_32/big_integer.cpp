@@ -13,7 +13,8 @@ big_integer::big_integer()
 
 big_integer::big_integer(big_integer const &other) = default;
 
-big_integer::big_integer(int a) : sign(a >= 0), data(1, static_cast<uint32_t>(abs((long long int) a))) {
+big_integer::big_integer(int a) : sign(a >= 0) {
+    data = std::vector<uint32_t >(1, static_cast<uint32_t>(std::abs(static_cast<long long>(a))));
 }
 
 void big_integer::add_uint32_t(uint32_t const x) {
