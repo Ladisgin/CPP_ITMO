@@ -38,6 +38,8 @@ public:
 
     my_vector();
 
+    my_vector(my_vector const &other);
+
     my_vector(size_t sz);
 
     my_vector(size_t sz, uint32_t val);

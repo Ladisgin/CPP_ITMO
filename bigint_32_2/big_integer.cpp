@@ -17,7 +17,8 @@ big_integer::big_integer(big_integer const &other) {
     data = other.data;
 }
 
-big_integer::big_integer(int a) : sign(a >= 0), data(1, static_cast<uint32_t>(abs((long long int) a))) {
+big_integer::big_integer(int a) : sign(a >= 0) {
+    data = my_vector(1, static_cast<uint32_t>(abs((long long int) a)));
 }
 
 void big_integer::add_uint32_t(uint32_t const x) {
@@ -317,19 +318,19 @@ big_integer big_integer::operator--(int) {
 big_integer &big_integer::operator<<=(int shift) {
     //data.insert(data.begin(), (shift / std::numeric_limits<uint32_t>::digits), 0);
     size_t s = (shift / std::numeric_limits<uint32_t>::digits);
-    my_vector new_vector(data.size() + s, 0);
-    for (size_t i = 0; i < s; i++) {
-        new_vector[i] = 0;
+    if (s) {
+        my_vector new_vector(data.size() + s, 0);
+        for (size_t i = 0; i < data.size(); i++) {
+            new_vector[i + s] = data[i];
+        }
+        data = new_vector;
     }
-    for (size_t i = 0; i < data.size(); i++) {
-        new_vector[i + s] = data[i];
-    }
-    data = new_vector;
     uint32_t shl = static_cast<uint32_t>(shift) % std::numeric_limits<uint32_t>::digits;
     if (shl != 0) {
         for (size_t i = data.size() - 1; i != 0; i--) {
             data[i] = ((data[i] << shl) | (data[i - 1] >> (std::numeric_limits<uint32_t>::digits - shl)));
         }
+        std::string m = to_string(*this);
         data[0] <<= shl;
     }
     remove_lead_zeros();

@@ -60,6 +60,17 @@ my_vector::my_vector() {
     _data.reset(new data_struct());
 }
 
+my_vector::my_vector(my_vector const &other) {
+    other._data->ensure_capacity(other._data->size);
+    if (other._data->is_big) {
+        _data = other._data;
+    } else {
+        _data->ensure_capacity(other._data->size);
+        std::copy(other._data->union_data.small_data, other._data->union_data.small_data + other._data->size,
+                  _data->union_data.small_data);
+    }
+}
+
 my_vector::my_vector(size_t sz) {
     _data.reset(new data_struct());
     _data->ensure_capacity(sz);
@@ -130,6 +141,7 @@ my_vector &my_vector::operator=(my_vector const &other) {
     if (other._data->is_big) {
         _data = other._data;
     } else {
+        data_copy();
         _data->ensure_capacity(other._data->size);
         std::copy(other._data->union_data.small_data, other._data->union_data.small_data + other._data->size,
                   _data->union_data.small_data);
