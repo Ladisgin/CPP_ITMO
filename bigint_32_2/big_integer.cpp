@@ -18,7 +18,7 @@ big_integer::big_integer(big_integer const &other) {
 }
 
 big_integer::big_integer(int a) : sign(a >= 0) {
-    data = my_vector(1, static_cast<uint32_t>(abs((long long int) a)));
+    data = my_vector(1, static_cast<uint32_t>(std::abs(static_cast<long long>(a))));
 }
 
 void big_integer::add_uint32_t(uint32_t const x) {
