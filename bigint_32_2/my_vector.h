@@ -10,7 +10,7 @@
 #include <memory>
 
 struct data_struct {
-    static const size_t SMALL_SIZE = 1;
+    static const size_t SMALL_SIZE = 4;
     union {
         uint32_t small_data[SMALL_SIZE];
         uint32_t *big_data;
