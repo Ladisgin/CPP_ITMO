@@ -15,7 +15,7 @@ data_struct::~data_struct() {
 
 void data_struct::ensure_capacity(size_t sz) {
     if (sz > capacity) {
-        capacity = (sz * 2);
+        capacity = std::max(sz, capacity * 2);
         auto new_int = new uint32_t[capacity];
         if (is_big) {
             std::copy(union_data.big_data, union_data.big_data + size, new_int);
