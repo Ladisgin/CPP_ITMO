@@ -31,6 +31,8 @@ struct data_struct {
 class my_vector {
 private:
     std::shared_ptr<data_struct> _data;
+    bool is_copy;
+    std::shared_ptr<data_struct> _old_data;
 public:
     void data_copy();
 
