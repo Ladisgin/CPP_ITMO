@@ -516,7 +516,7 @@ big_integer &big_integer::operator|=(const big_integer &rhs) {
     big_integer that(rhs);
     if (that.data.size() > this->data.size()) {
 //        this->data.insert(this->data.end(), that.data.size() - this->data.size(), 0);
-        for (int i = 0; i < that.data.size() - this->data.size(); ++i) {
+        for (size_t i = 0; i < that.data.size() - this->data.size(); ++i) {
             data.push_back(0);
         }
     }
@@ -540,7 +540,7 @@ big_integer &big_integer::operator^=(const big_integer &rhs) {
     big_integer that(rhs);
     if (that.data.size() > this->data.size()) {
 //        this->data.insert(this->data.end(), that.data.size() - this->data.size(), 0);
-        for (int i = 0; i < that.data.size() - this->data.size(); ++i) {
+        for (size_t i = 0; i < that.data.size() - this->data.size(); ++i) {
             data.push_back(0);
         }
     }
