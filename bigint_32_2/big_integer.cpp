@@ -11,9 +11,7 @@
 big_integer::big_integer()
         : sign(true), data(1, 0) {}
 
-big_integer::big_integer(big_integer const &other) {
-    *this = big_integer();
-    sign = other.sign;
+big_integer::big_integer(big_integer const &other) : sign(other.sign) {
     data = other.data;
 }
 
@@ -24,7 +22,7 @@ big_integer::big_integer(int a) : sign(a >= 0) {
 void big_integer::add_uint32_t(uint32_t const x) {
     uint64_t result = data[0] + static_cast<uint64_t>(x);
     data[0] = static_cast<uint32_t>(result);
-    uint32_t carry = static_cast<uint32_t>(result >> std::numeric_limits<uint32_t>::digits);
+    auto carry = static_cast<uint32_t>(result >> std::numeric_limits<uint32_t>::digits);
     uint32_t position = 1;
     while (carry != 0) {
         if (position == data.size()) {
@@ -43,7 +41,7 @@ void big_integer::mul_uint32_t(uint32_t const x) {
     uint64_t mul = static_cast<uint32_t>(x);
     uint64_t carry = 0;
     uint64_t result = 0;
-    for (size_t i = 0; i < data.size() || carry > 0; i++) {
+    for (size_t i = 0; i < data.size() || carry > 0; ++i) {
         if (i == data.size()) {
             result = static_cast<uint64_t>(carry);
             data.push_back(static_cast<uint32_t>(result));
@@ -57,14 +55,14 @@ void big_integer::mul_uint32_t(uint32_t const x) {
 
 big_integer::big_integer(std::string const &str) {
     sign = true;
-    data = my_vector(1, 0);
+    data.resize(1, 0);
     size_t position = 0;
     if (str[position] == '-') {
         sign = false;
         position++;
     }
     for (; position != str.length(); position++) {
-        uint32_t digit = static_cast<uint32_t>(str[position] - '0');
+        auto digit = static_cast<uint32_t>(str[position] - '0');
         mul_uint32_t(10);
         add_uint32_t(digit);
     }
@@ -72,11 +70,7 @@ big_integer::big_integer(std::string const &str) {
 
 big_integer::~big_integer() = default;
 
-big_integer &big_integer::operator=(big_integer const &other) {
-    sign = other.sign;
-    data = other.data;
-    return *this;
-}
+big_integer &big_integer::operator=(big_integer const &other) = default;
 
 bool big_integer::is_zero() const {
     return (data.size() == 1 && data[0] == 0);
@@ -148,7 +142,7 @@ void big_integer::add_unsigned(big_integer const &rhs) {
     uint32_t carry = 0;
     uint64_t result = 0;
     size_t max_range = std::max(this->data.size(), rhs.data.size());
-    for (size_t i = 0; i < max_range || carry > 0; i++) {
+    for (size_t i = 0; i < max_range || carry > 0; ++i) {
         if (i == this->data.size()) {
             if (i < rhs.data.size()) {
                 result = static_cast<uint64_t>(carry) + rhs.data[i];
@@ -181,7 +175,7 @@ void big_integer::sub_uint32_t(uint32_t const x) {
         data[0] = static_cast<uint32_t>(result);
         loan = true;
     }
-    for (size_t i = 1; i < data.size() && loan; i++) {
+    for (size_t i = 1; i < data.size() && loan; ++i) {
         if (data[i]) {
             data[i]--;
             loan = false;
@@ -196,7 +190,7 @@ void big_integer::sub_unsigned(big_integer const &rhs) {
     int64_t result = 0;
     int64_t minuend = 0;
     int64_t sub = 0;
-    for (size_t i = 0; i != this->data.size(); i++) {
+    for (size_t i = 0; i != this->data.size(); ++i) {
         minuend = this->data[i];
         if (i < rhs.data.size()) {
             sub = rhs.data[i];
@@ -320,7 +314,7 @@ big_integer &big_integer::operator<<=(int shift) {
     size_t s = (shift / std::numeric_limits<uint32_t>::digits);
     if (s) {
         my_vector new_vector(data.size() + s, 0);
-        for (size_t i = 0; i < data.size(); i++) {
+        for (size_t i = 0; i < data.size(); ++i) {
             new_vector[i + s] = data[i];
         }
         data = new_vector;
@@ -330,7 +324,6 @@ big_integer &big_integer::operator<<=(int shift) {
         for (size_t i = data.size() - 1; i != 0; i--) {
             data[i] = ((data[i] << shl) | (data[i - 1] >> (std::numeric_limits<uint32_t>::digits - shl)));
         }
-        std::string m = to_string(*this);
         data[0] <<= shl;
     }
     remove_lead_zeros();
@@ -347,18 +340,16 @@ big_integer &big_integer::operator>>=(int shift) {
     if (del > data.size()) {
         return *this = 0;
     }
-    my_vector new_vector(data.size() - del);
-    for (size_t i = 0; i < data.size() - del; i++) {
-        new_vector[i] = data[i + del];
-    }
-    data = new_vector;
-    if (data.empty()) {
-        data.resize(1, 0);
-        sign = true;
+    if (del) {
+        my_vector new_vector(data.size() - del);
+        for (size_t i = 0; i < data.size() - del; ++i) {
+            new_vector[i] = data[i + del];
+        }
+        data = new_vector;
     }
     uint32_t shr = static_cast<uint32_t>(shift) % std::numeric_limits<uint32_t>::digits;
     if (shr != 0) {
-        for (size_t i = 0; i != data.size() - 1; i++) {
+        for (size_t i = 0; i != data.size() - 1; ++i) {
             data[i] = ((data[i] >> shr) | (data[i + 1] << (std::numeric_limits<uint32_t>::digits - shr)));
         }
         data[data.size() - 1] >>= shr;
@@ -387,7 +378,7 @@ big_integer big_integer::mul_uint32_t_return(uint32_t const x) const {
 big_integer &big_integer::operator*=(big_integer const &rhs) {
     this->sign = this->sign == rhs.sign;
     big_integer result;
-    for (size_t i = 0; i != rhs.data.size(); i++) {
+    for (size_t i = 0; i != rhs.data.size(); ++i) {
         result += this->mul_uint32_t_return(rhs.data[i]) << (std::numeric_limits<uint32_t>::digits * i);
     }
     return *this = result;
@@ -487,7 +478,7 @@ big_integer operator%(big_integer left, const big_integer &right) {
 
 void big_integer::code() {
     if (!sign) {
-        for (size_t i = 0; i != data.size(); i++) {
+        for (size_t i = 0; i != data.size(); ++i) {
             data[i] = ~data[i];
         }
         add_uint32_t(1);
@@ -497,7 +488,7 @@ void big_integer::code() {
 void big_integer::decode() {
     if (!sign) {
         sub_uint32_t(1);
-        for (size_t i = 0; i != data.size(); i++) {
+        for (size_t i = 0; i != data.size(); ++i) {
             data[i] = ~data[i];
         }
     }
@@ -507,7 +498,7 @@ big_integer &big_integer::operator&=(const big_integer &rhs) {
     big_integer that(rhs);
     this->code();
     that.code();
-    for (size_t i = 0; i != that.data.size(); i++) {
+    for (size_t i = 0; i != that.data.size(); ++i) {
         this->data[i] &= that.data[i];
     }
     this->sign = this->sign || that.sign;
@@ -525,13 +516,13 @@ big_integer &big_integer::operator|=(const big_integer &rhs) {
     big_integer that(rhs);
     if (that.data.size() > this->data.size()) {
 //        this->data.insert(this->data.end(), that.data.size() - this->data.size(), 0);
-        for (int i = 0; i < that.data.size() - this->data.size(); i++) {
+        for (int i = 0; i < that.data.size() - this->data.size(); ++i) {
             data.push_back(0);
         }
     }
     this->code();
     that.code();
-    for (size_t i = 0; i != that.data.size(); i++) {
+    for (size_t i = 0; i != that.data.size(); ++i) {
         this->data[i] |= that.data[i];
     }
     this->sign = this->sign && that.sign;
@@ -549,13 +540,13 @@ big_integer &big_integer::operator^=(const big_integer &rhs) {
     big_integer that(rhs);
     if (that.data.size() > this->data.size()) {
 //        this->data.insert(this->data.end(), that.data.size() - this->data.size(), 0);
-        for (int i = 0; i < that.data.size() - this->data.size(); i++) {
+        for (int i = 0; i < that.data.size() - this->data.size(); ++i) {
             data.push_back(0);
         }
     }
     this->code();
     that.code();
-    for (size_t i = 0; i != that.data.size(); i++) {
+    for (size_t i = 0; i != that.data.size(); ++i) {
         this->data[i] ^= that.data[i];
     }
     this->sign = !(this->sign ^ that.sign);
@@ -596,5 +587,3 @@ std::string to_string(big_integer const &a) {
 std::ostream &operator<<(std::ostream &os, big_integer const &a) {
     return os << to_string(a);
 }
-
-#undef int64_t
