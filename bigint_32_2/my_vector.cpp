@@ -3,6 +3,7 @@
 //
 
 #include "my_vector.h"
+#include <iostream>
 
 data_struct::data_struct() : size(0), capacity(SMALL_SIZE), is_big(false) {
 }
@@ -40,22 +41,33 @@ void data_struct::ensure_capacity(size_t sz) {
 
 //main part
 void my_vector::data_copy() {
-    if (is_copy) {
-        _data.swap(_old_data);
-        _data->ensure_capacity(_old_data->size);
-        std::copy(_old_data->union_data.big_data, _old_data->union_data.big_data + _old_data->size,
-                  _data->union_data.big_data);
-        _old_data.reset();
-        is_copy = false;
+    if (!_data.unique()) {
+        if (_old_data) {
+            _data.swap(_old_data);
+            _data->ensure_capacity(_old_data->size);
+            std::copy(_old_data->union_data.big_data, _old_data->union_data.big_data + _old_data->size,
+                      _data->union_data.big_data);
+            _old_data.reset();
+        } else {
+            auto old_data_pointer = _data->union_data.big_data;
+            size_t sz = _data->size;
+            _data.reset(new data_struct());
+            _data->ensure_capacity(sz);
+            std::copy(old_data_pointer, old_data_pointer + sz, _data->union_data.big_data);
+        }
     }
 }
 
 
 void my_vector::data_without_copy() {
-    if (is_copy) {
-        _data.swap(_old_data);
-        _old_data.reset();
-        is_copy = false;
+    if (!_data.unique()) {
+        if(_old_data) {
+            _data.swap(_old_data);
+            _old_data.reset();
+        } else {
+            _data.reset(new data_struct());;
+        }
+
     }
 }
 
@@ -63,20 +75,17 @@ my_vector::my_vector() : is_copy(false) {
     _data.reset(new data_struct());
 }
 
-my_vector::my_vector(my_vector const &other) : is_copy(false) {
+my_vector::my_vector(my_vector const &other) {
     other._data->ensure_capacity(other._data->size);
     if (other._data->is_big) {
-        if (is_copy) {
-            _data = other._data;
-        } else {
-            _old_data = other._data;
-            _data.swap(_old_data);
-            is_copy = true;
-        }
+        _old_data = other._data;
+        _data.swap(_old_data);
+        is_copy = true;
     } else {
         _data->ensure_capacity(other._data->size);
         std::copy(other._data->union_data.small_data, other._data->union_data.small_data + other._data->size,
                   _data->union_data.small_data);
+        is_copy = false;
     }
 }
 
