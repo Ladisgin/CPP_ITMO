@@ -57,34 +57,34 @@ int main(int argc, char *argv[]) {
 
 void test(const std::string &generate_file_name) {
     if (is_equal(generate_file_name)) {
-        std::__1::cout << "test: " << count_test << " complete" << std::__1::endl;
+        std::cout << "test: " << count_test << " complete" << std::endl;
         count_pass_test++;
     } else {
-        std::__1::cout << "test: " << count_test << " error :(" << std::__1::endl;
+        std::cout << "test: " << count_test << " error :(" << std::endl;
     }
     count_test++;
-    std::__1::cout << std::__1::endl;
+    std::cout << std::endl;
 }
 
 bool is_equal(const std::string &generate_file_name) {
 
 
-    std::__1::string encd;
+    std::string encd;
     encd = dir.substr(0, dir.length() - 12) + "encode ";
     encd += generate_file_name;
     system(encd.c_str());
 
-    std::__1::string decd;
+    std::string decd;
     decd = dir.substr(0, dir.length() - 12) + "decode ";
     decd += generate_file_name + ".huff";
     system(decd.c_str());
 
-    std::__1::ifstream original_file(generate_file_name, std::__1::ios_base::in | std::__1::ios_base::binary);
-    std::__1::ifstream decode_file(generate_file_name + ".decode",
-                                   std::__1::ios_base::in | std::__1::ios_base::binary);
+    std::ifstream original_file(generate_file_name, std::ios_base::in | std::ios_base::binary);
+    std::ifstream decode_file(generate_file_name + ".decode",
+                                   std::ios_base::in | std::ios_base::binary);
 
-    std::__1::vector<char> buffer(4000, 0);
-    std::__1::vector<char> buffer_2(4000, 0);
+    std::vector<char> buffer(4000, 0);
+    std::vector<char> buffer_2(4000, 0);
     bool flag = true;
     long gc, gc_2;
     while (!original_file.eof() && !decode_file.eof() && flag) {
@@ -107,8 +107,8 @@ bool is_equal(const std::string &generate_file_name) {
 
 void generate_file(const std::string &generate_file_name) {
     srand(time(0));
-    std::__1::ofstream fout(generate_file_name, std::__1::ios_base::out | std::__1::ios_base::binary);
-    std::__1::vector<char> buffer(rand() % 8000);
+    std::ofstream fout(generate_file_name, std::ios_base::out | std::ios_base::binary);
+    std::vector<char> buffer(rand() % 8000);
     for (size_t l = 0; l < (rand() % 8000); l++) {
         for (size_t j = 0; j < buffer.size(); j++) {
             buffer[j] = static_cast<char>((rand() % 256) - 128);
@@ -119,14 +119,14 @@ void generate_file(const std::string &generate_file_name) {
 }
 
 void generate_empty_file(const std::string &generate_file_name) {
-    std::__1::ofstream fout(generate_file_name, std::__1::ios_base::out | std::__1::ios_base::binary);
+    std::ofstream fout(generate_file_name, std::ios_base::out | std::ios_base::binary);
     fout.close();
 }
 
 void generate_big_file(const std::string &generate_file_name) {
     srand(time(0));
-    std::__1::ofstream fout(generate_file_name, std::__1::ios_base::out | std::__1::ios_base::binary);
-    std::__1::vector<char> buffer(8000);
+    std::ofstream fout(generate_file_name, std::ios_base::out | std::ios_base::binary);
+    std::vector<char> buffer(8000);
     for (size_t l = 0; l < 10000; l++) {
         for (size_t j = 0; j < buffer.size(); j++) {
             buffer[j] = static_cast<char>((rand() % 256) - 128);
@@ -138,8 +138,8 @@ void generate_big_file(const std::string &generate_file_name) {
 
 void generate_good_file(const std::string &generate_file_name) {
     srand(time(0));
-    std::__1::ofstream fout(generate_file_name, std::__1::ios_base::out | std::__1::ios_base::binary);
-    std::__1::vector<char> buffer(8000);
+    std::ofstream fout(generate_file_name, std::ios_base::out | std::ios_base::binary);
+    std::vector<char> buffer(8000);
     for (size_t l = 0; l < 10000; l++) {
         for (size_t j = 0; j < buffer.size(); j++) {
             buffer[j] = 33;
