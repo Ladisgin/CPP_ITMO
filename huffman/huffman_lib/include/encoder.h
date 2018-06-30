@@ -16,7 +16,7 @@ public:
 
     encoder(counter &cntr);
 
-    byte_vector encode(std::vector<byte> data);
+    byte_vector encode(std::vector<byte> const &data);
 
     std::vector<std::pair<byte, code_len>> give_alphabet();
 };

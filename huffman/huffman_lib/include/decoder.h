@@ -20,7 +20,7 @@ public:
 
     decoder(std::vector<std::pair<byte, code_len>>);
 
-    std::vector<byte> decode(std::vector<byte> v);
+    std::vector<byte> decode(std::vector<byte> const &v);
 };
 
 

@@ -11,7 +11,7 @@ decoder::decoder(std::vector<std::pair<byte, code_len>> v) : current_state() {
     }
 }
 
-std::vector<byte> decoder::decode(std::vector<byte> v) {
+std::vector<byte> decoder::decode(std::vector<byte> const &v) {
     std::vector<byte> res;
     for (int i = 0; i < v.size(); i++) {
         for (size_t j = static_cast<size_t>(std::numeric_limits<byte>::digits); j > 0; j--) {

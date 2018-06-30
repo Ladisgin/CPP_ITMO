@@ -7,10 +7,10 @@
 encoder::encoder(counter &cntr) : huffman_tree(cntr.get_tree()) {
 }
 
-byte_vector encoder::encode(std::vector<byte> data) {
+byte_vector encoder::encode(std::vector<byte> const &data) {
     byte_vector res;
     for (auto i : data) {
-        if(huffman_tree[i].len == 0){
+        if (huffman_tree[i].len == 0) {
             throw std::runtime_error("incorrect file");
         }
         res.push_back(huffman_tree[i]);
