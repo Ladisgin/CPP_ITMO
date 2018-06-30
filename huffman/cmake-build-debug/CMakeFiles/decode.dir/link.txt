@@ -1,1 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/c++   -Wall -std=c++14 -g -fsanitize=address,undefined -fno-omit-frame-pointer -D_GLIBCXX_DEBUG -Wl,-search_paths_first -Wl,-headerpad_max_install_names  CMakeFiles/decode.dir/utils/decode.cpp.o  -o decode huffman_lib/libhufflib.a 

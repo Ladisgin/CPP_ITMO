@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc libhufflib.a  CMakeFiles/hufflib.dir/counter.cpp.o CMakeFiles/hufflib.dir/byte_vector.cpp.o CMakeFiles/hufflib.dir/encoder.cpp.o CMakeFiles/hufflib.dir/decoder.cpp.o CMakeFiles/hufflib.dir/code_len.cpp.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib libhufflib.a
