@@ -4,7 +4,7 @@
 
 #include "include/byte_vector.h"
 
-byte_vector::byte_vector() : data(1, 0), last_size(0) {
+byte_vector::byte_vector() : data(1, static_cast<byte>(0)), last_size(0) {
 }
 
 
@@ -40,4 +40,9 @@ void byte_vector::push_back(code_len const &sym) {
                 >> (std::numeric_limits<uint64_t>::digits - (i * std::numeric_limits<byte>::digits))) &
                                     std::numeric_limits<byte>::max()), re);
     }
+}
+
+void byte_vector::set_zero() {
+    data.resize(1);
+    data.back() = 0;
 }

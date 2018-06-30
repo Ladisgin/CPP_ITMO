@@ -9,6 +9,8 @@
 #include <string>
 #include <iostream>
 
+
+
 int main(int argc, char *argv[]) {
     clock_t start = clock();
     std::string in_file_name = argv[1];
@@ -69,7 +71,7 @@ int main(int argc, char *argv[]) {
         if (bvn.last_size) {
             bv.push_back(bvn.data.back(), bvn.last_size);
         }
-        if (bv.data.size() - 1) {
+        if (bv.data.size() > 1) {
             fout.write((char *) bv.data.data(), (bv.data.size() - 1));
         }
         if (bv.last_size) {
@@ -77,7 +79,7 @@ int main(int argc, char *argv[]) {
             bv.data.resize(1);
             bv.data.back() = x;
         } else {
-            bv.data.resize(1, 0);
+            bv.set_zero();
         }
     }
     if (bv.last_size) {

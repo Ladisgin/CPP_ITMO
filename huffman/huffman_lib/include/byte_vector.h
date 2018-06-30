@@ -9,7 +9,6 @@
 #include "code_len.h"
 
 class byte_vector {
-private:
 public:
     std::vector<byte> data;
     size_t last_size;
@@ -21,6 +20,8 @@ public:
     void push_back(byte const &sym);
 
     void push_back(code_len const &sym);
+
+    void set_zero();
 };
 
 
