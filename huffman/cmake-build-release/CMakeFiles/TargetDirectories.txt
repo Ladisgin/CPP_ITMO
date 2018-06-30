@@ -1,0 +1,8 @@
+/Users/kalugin/CLionProjects/huffman/cmake-build-release/CMakeFiles/rebuild_cache.dir
+/Users/kalugin/CLionProjects/huffman/cmake-build-release/CMakeFiles/edit_cache.dir
+/Users/kalugin/CLionProjects/huffman/cmake-build-release/CMakeFiles/huffman_test.dir
+/Users/kalugin/CLionProjects/huffman/cmake-build-release/CMakeFiles/decode.dir
+/Users/kalugin/CLionProjects/huffman/cmake-build-release/CMakeFiles/encode.dir
+/Users/kalugin/CLionProjects/huffman/cmake-build-release/huffman_lib/CMakeFiles/rebuild_cache.dir
+/Users/kalugin/CLionProjects/huffman/cmake-build-release/huffman_lib/CMakeFiles/edit_cache.dir
+/Users/kalugin/CLionProjects/huffman/cmake-build-release/huffman_lib/CMakeFiles/hufflib.dir
