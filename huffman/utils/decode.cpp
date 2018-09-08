@@ -52,10 +52,11 @@ int main(int argc, char *argv[]) {
         ans_buffer = dcdr.decode(buffer);
         if (ans_buffer.size() < count_of_char) {
             fout.write((char *) ans_buffer.data(), ans_buffer.size());
+            count_of_char -= ans_buffer.size();
         } else {
             fout.write((char *) ans_buffer.data(), count_of_char);
+            count_of_char = 0;
         }
-        count_of_char -= ans_buffer.size();
     }
 
     if(count_of_char > 0){
