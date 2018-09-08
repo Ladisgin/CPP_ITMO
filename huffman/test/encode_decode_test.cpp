@@ -8,11 +8,13 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include <sys/stat.h>
 
 
 size_t count_test = 0;
 size_t count_pass_test = 0;
-std::string dir = "";
+std::string dir;
+int getFileSize(const std::string &fileName);
 
 void generate_file(const std::string &generate_file_name);
 
@@ -29,26 +31,30 @@ void test(const std::string &generate_file_name);
 int main(int argc, char *argv[]) {
     std::string generate_file_name = "testing_file.in";
     dir = argv[0];
-    for (size_t i = 0; i < 5; i++) {
-        generate_empty_file(generate_file_name);
-        test(generate_file_name);
-    }
 
-    for (size_t i = 0; i < 75; i++) {
+    std::cout << "empty file test:" << std::endl;
+    generate_empty_file(generate_file_name);
+    test(generate_file_name);
+
+    for (size_t i = 0; i < 20; i++) {
+        std::cout << "file test:" << std::endl;
         generate_file(generate_file_name);
         test(generate_file_name);
     }
 
+
+    std::cout << "big file test:" << std::endl;
     generate_big_file(generate_file_name);
     test(generate_file_name);
 
 
+    std::cout << "good file test:" << std::endl;
     generate_good_file(generate_file_name);
     test(generate_file_name);
 
 
     if (count_test == count_pass_test) {
-        std::cout << count_pass_test << " test completed :)";
+        std::cout << "All test completed :)";
     } else {
         std::cout << count_pass_test << " from " << count_test << "completed :(";
     }
@@ -67,8 +73,6 @@ void test(const std::string &generate_file_name) {
 }
 
 bool is_equal(const std::string &generate_file_name) {
-
-
     std::string encd;
     encd = dir.substr(0, dir.length() - 12) + "encode ";
     encd += generate_file_name;
@@ -82,7 +86,9 @@ bool is_equal(const std::string &generate_file_name) {
     std::ifstream original_file(generate_file_name, std::ios_base::in | std::ios_base::binary);
     std::ifstream decode_file(generate_file_name + ".decode",
                                    std::ios_base::in | std::ios_base::binary);
-
+    if(!decode_file || !original_file){
+        return false;
+    }
     std::vector<char> buffer(4000, 0);
     std::vector<char> buffer_2(4000, 0);
     bool flag = true;
@@ -106,12 +112,12 @@ bool is_equal(const std::string &generate_file_name) {
 }
 
 void generate_file(const std::string &generate_file_name) {
-    srand(time(0));
+    srand(time(nullptr));
     std::ofstream fout(generate_file_name, std::ios_base::out | std::ios_base::binary);
     std::vector<char> buffer(rand() % 8000);
     for (size_t l = 0; l < (rand() % 8000); l++) {
-        for (size_t j = 0; j < buffer.size(); j++) {
-            buffer[j] = static_cast<char>((rand() % 256) - 128);
+        for (char &j : buffer) {
+            j = static_cast<char>((rand() % 256) - 128);
         }
         fout.write(buffer.data(), buffer.size());
     }
@@ -124,12 +130,12 @@ void generate_empty_file(const std::string &generate_file_name) {
 }
 
 void generate_big_file(const std::string &generate_file_name) {
-    srand(time(0));
+    srand(time(nullptr));
     std::ofstream fout(generate_file_name, std::ios_base::out | std::ios_base::binary);
     std::vector<char> buffer(8000);
     for (size_t l = 0; l < 10000; l++) {
-        for (size_t j = 0; j < buffer.size(); j++) {
-            buffer[j] = static_cast<char>((rand() % 256) - 128);
+        for (char &j : buffer) {
+            j = static_cast<char>((rand() % 256) - 128);
         }
         fout.write(buffer.data(), buffer.size());
     }
@@ -137,12 +143,12 @@ void generate_big_file(const std::string &generate_file_name) {
 }
 
 void generate_good_file(const std::string &generate_file_name) {
-    srand(time(0));
+    srand(time(nullptr));
     std::ofstream fout(generate_file_name, std::ios_base::out | std::ios_base::binary);
     std::vector<char> buffer(8000);
     for (size_t l = 0; l < 10000; l++) {
-        for (size_t j = 0; j < buffer.size(); j++) {
-            buffer[j] = 33;
+        for (char &j : buffer) {
+            j = 33;
         }
         fout.write(buffer.data(), buffer.size());
     }

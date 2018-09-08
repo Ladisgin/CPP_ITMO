@@ -11,6 +11,22 @@
 
 
 
+int getFileSize(const std::string &fileName)
+{
+    std::ifstream file(fileName.c_str(), std::ifstream::in | std::ifstream::binary);
+
+    if(!file.is_open())
+    {
+        return -1;
+    }
+
+    file.seekg(0, std::ios::end);
+    int fileSize = file.tellg();
+    file.close();
+
+    return fileSize;
+}
+
 int main(int argc, char *argv[]) {
     clock_t start = clock();
     std::string in_file_name = argv[1];
@@ -90,5 +106,7 @@ int main(int argc, char *argv[]) {
 
 
     clock_t end = clock();
+    std::cout << "file size: " << getFileSize(in_file_name) << std::endl;
+    std::cout << "encode file size: " << getFileSize(out_file_name) << std::endl;
     std::cout << "encode time: " << (double) (end - start) / CLOCKS_PER_SEC << std::endl;
 }
