@@ -57,6 +57,9 @@ public:
     }
 
     void pop_back() {
+        if (!_size) {
+            throw std::bad_alloc{};
+        }
         reinterpret_cast<const T *>(data + _size - 1)->~T();
         --_size;
     }
@@ -101,41 +104,46 @@ public:
         return N;
     }
 
-    using iterator = T*;
-    using const_iterator = T const*;
+    friend void swap(fixed_vector &first, fixed_vector &second) {
+        std::swap(first._size, second._size);
+        std::swap(first.data, second.data);
+    }
+
+    using iterator = T *;
+    using const_iterator = T const *;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     iterator begin() {
-        return reinterpret_cast<T*>(data);
+        return reinterpret_cast<T *>(data);
     }
 
     const_iterator begin() const {
-        return const_cast<T const*>(reinterpret_cast<T*>(data));
+        return const_cast<T const *>(reinterpret_cast<T *>(data));
     }
 
     reverse_iterator rbegin() {
-        return reverse_iterator(reinterpret_cast<T*>(data) + size());
+        return reverse_iterator(reinterpret_cast<T *>(data) + size());
     }
 
     const_reverse_iterator rbegin() const {
-        return const_reverse_iterator(const_cast<T const*>(reinterpret_cast<T*>(data) + size()));
+        return const_reverse_iterator(const_cast<T const *>(reinterpret_cast<T *>(data) + size()));
     }
 
     iterator end() {
-        return reinterpret_cast<T*>(data) + size();
+        return reinterpret_cast<T *>(data) + size();
     }
 
     const_iterator end() const {
-        return const_cast<T const*>(reinterpret_cast<T*>(data) + size());
+        return const_cast<T const *>(reinterpret_cast<T *>(data) + size());
     }
 
     reverse_iterator rend() {
-        return reverse_iterator(reinterpret_cast<T*>(data));
+        return reverse_iterator(reinterpret_cast<T *>(data));
     }
 
     const_reverse_iterator rend() const {
-        return const_reverse_iterator(const_cast<T const*>(reinterpret_cast<T*>(data)));
+        return const_reverse_iterator(const_cast<T const *>(reinterpret_cast<T *>(data)));
     }
 
     const_iterator insert(size_t const &pos, size_t const &val) {

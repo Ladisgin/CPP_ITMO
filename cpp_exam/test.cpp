@@ -4,6 +4,9 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <random>
+#include <ctime>
+#include <cmath>
 #include "fixed_vector.h"
 
 using namespace std;
@@ -21,52 +24,77 @@ bool diff(fixed_vector<T, N> const &fv, vector<T> v) {
 }
 
 int main() {
-    fixed_vector<int, 999> fv;
-    vector<int> k(0);
-    for (int i = 0; i < 50; i++) {
-//        if ((i + 1) % 25) {
-        fv.push_back(i);
-        k.push_back(i);
-//        } else {
-//            fv.pop_back();
-//            k.pop_back();
-//        }
-//        fv[i/7] = i*3;
-//        k[i/7] = i*3;
-    }
-    cout << (diff(fv, k) ? "Good push back" : "Bad") << endl;
-    fixed_vector<int, 999> fv2(fv);
-    cout << (diff(fv2, k) ? "Good copy constructor" : "Bad") << endl;
-    fixed_vector<int, 999> fv3 = fixed_vector<int, 999>(fv);
-    cout << (diff(fv3, k) ? "Good" : "Bad") << endl;
-    fixed_vector<int, 999> fv4;
-    fv4 = fixed_vector<int, 999>(fv);
-    cout << (diff(fv3, k) ? "Good operator =" : "Bad") << endl;
-//    for (auto i:fv) {
-//        cout << i << endl;
-//    }
+    srand(time(nullptr));
+    const size_t capacity = 12345;
 
-    //fix::iterator it = fv.begin();
+    fixed_vector<int, capacity> test_fixed_vector;
+    vector<int> test_vector(0);
+    for (int i = 0; i < rand() % capacity; i++) {
+        int r = rand();
+        test_fixed_vector.push_back(r);
+        test_vector.push_back(r);
+    }
+    cout << (diff(test_fixed_vector, test_vector) ? "Good push_back()" : "Bad") << endl;
+
+
+    cout << (test_fixed_vector.size() == test_vector.size() ? "Good size()" : "Bad") << endl;
+
+
+    cout << (test_fixed_vector.max_size() == capacity ? "Good max_size()" : "Bad") << endl;
+
+
+    cout << (test_fixed_vector.capacity() == capacity ? "Good capacity()" : "Bad") << endl;
+
+
+    auto fv2(test_fixed_vector);
+    cout << (diff(fv2, test_vector) ? "Good copy constructor" : "Bad") << endl;
+
+
+    auto fv3 = test_fixed_vector;
+    cout << (diff(fv3, test_vector) ? "Good copy constructor 2" : "Bad") << endl;
+
+
+    fixed_vector<int, capacity> fv4;
+    fv4 = test_fixed_vector;
+    cout << (diff(fv3, test_vector) ? "Good operator =" : "Bad") << endl;
+
+
+    auto fv5(test_fixed_vector);
+    auto k1(test_vector);
+    for (size_t i = 0; i < rand() % fv5.size(); i++) {
+        fv5.pop_back();
+        k1.pop_back();
+    }
+    cout << (diff(fv5, k1) ? "Good pop_back()" : "Bad") << endl;
+
+
+    fixed_vector<int, capacity> sf;
+    auto ss = test_fixed_vector;
+    swap(sf, ss);
+    cout << (diff(sf, test_vector) ? "Good swap" : "Bad") << endl;
+
+
     int l = 0;
 
-    for (auto r = fv.begin(); r < fv.end(); r++) {
+    for (auto r = test_fixed_vector.begin(); r < test_fixed_vector.end(); r++) {
         *r = l++;
     }
     l = 0;
-    for (auto r = k.begin(); r < k.end(); r++) {
+    for (auto r = test_vector.begin(); r < test_vector.end(); r++) {
         *r = l++;
     }
-    cout << (diff(fv, k) ? "Good iterator" : "Bad") << endl;
+    cout << (diff(test_fixed_vector, test_vector) ? "Good iterator" : "Bad") << endl;
+
 
     l = 44;
-    for (auto r = fv.rbegin(); r < fv.rend(); r++) {
+    for (auto r = test_fixed_vector.rbegin(); r < test_fixed_vector.rend(); r++) {
         *r = l++;
     }
     l = 44;
-    for (auto r = k.rbegin(); r < k.rend(); r++) {
+    for (auto r = test_vector.rbegin(); r < test_vector.rend(); r++) {
         *r = l++;
     }
-    cout << (diff(fv, k) ? "Good reverse iterator" : "Bad") << endl;
+    cout << (diff(test_fixed_vector, test_vector) ? "Good reverse iterator" : "Bad") << endl;
 }
 
 
