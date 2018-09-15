@@ -114,11 +114,12 @@ public:
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-    iterator begin() {
+
+    iterator begin(){
         return reinterpret_cast<T *>(data);
     }
 
-    const const_iterator begin() const {
+    const_iterator begin() const {
         return const_cast<T const *>(reinterpret_cast<T const *>(data));
     }
 
@@ -146,10 +147,11 @@ public:
         return const_reverse_iterator(const_cast<T const *>(reinterpret_cast<T const *>(data)));
     }
 
-    iterator insert(iterator const &it, size_t const &val) {
+    iterator insert(iterator const &c_it, size_t const &val) {
         if (_size >= N) {
             throw std::bad_alloc{};
         }
+        auto it = const_cast<T*>(c_it);
         for (auto i = end(); i > it; --i) {
             reinterpret_cast<const T *>(i)->~T();
             new(i) T(*(i - 1));
@@ -160,8 +162,12 @@ public:
         return it;
     }
 
-    iterator erase(iterator const &it) {
+    iterator erase(const_iterator c_it) {
+        if (!_size) {
+            throw std::bad_alloc{};
+        }
         --_size;
+        auto it = const_cast<T*>(c_it);
         for (auto i = it; i < end(); i++) {
             reinterpret_cast<const T *>(i)->~T();
             new(i) T(*(i + 1));
