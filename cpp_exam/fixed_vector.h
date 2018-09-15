@@ -118,8 +118,8 @@ public:
         return reinterpret_cast<T *>(data);
     }
 
-    const_iterator begin() const {
-        return const_cast<T const *>(reinterpret_cast<T *>(data));
+    const const_iterator begin() const {
+        return const_cast<T const *>(reinterpret_cast<T const *>(data));
     }
 
     reverse_iterator rbegin() {
@@ -127,7 +127,7 @@ public:
     }
 
     const_reverse_iterator rbegin() const {
-        return const_reverse_iterator(const_cast<T const *>(reinterpret_cast<T *>(data) + size()));
+        return const_reverse_iterator(const_cast<T const *>(reinterpret_cast<T const *>(data) + size()));
     }
 
     iterator end() {
@@ -135,7 +135,7 @@ public:
     }
 
     const_iterator end() const {
-        return const_cast<T const *>(reinterpret_cast<T *>(data) + size());
+        return const_cast<T const *>(reinterpret_cast<T const *>(data) + size());
     }
 
     reverse_iterator rend() {
@@ -143,31 +143,37 @@ public:
     }
 
     const_reverse_iterator rend() const {
-        return const_reverse_iterator(const_cast<T const *>(reinterpret_cast<T *>(data)));
+        return const_reverse_iterator(const_cast<T const *>(reinterpret_cast<T const *>(data)));
     }
 
-    const_iterator insert(size_t const &pos, size_t const &val) {
+    iterator insert(iterator const &it, size_t const &val) {
         if (_size >= N) {
             throw std::bad_alloc{};
         }
-        for (size_t i = _size; i > pos; --i) {
-            reinterpret_cast<const T *>(data + i)->~T();
-            new(data + i) T(data[i - 1]);
+        for (auto i = end(); i > it; --i) {
+            reinterpret_cast<const T *>(i)->~T();
+            new(i) T(*(i - 1));
         }
-        reinterpret_cast<const T *>(data + pos)->~T();
-        new(data + pos) T(val);
+        reinterpret_cast<const T *>(it)->~T();
+        new(it) T(val);
         ++_size;
-        return c_iterator(this, pos);
+        return it;
     }
 
-    const_iterator erase(size_t const &pos) {
+    iterator erase(iterator const &it) {
         --_size;
-        for (size_t i = pos; i < _size; ++i) {
-            reinterpret_cast<const T *>(data + i)->~T();
-            new(data + i) T(data[i + 1]);
+        for (auto i = it; i < end(); i++) {
+            reinterpret_cast<const T *>(i)->~T();
+            new(i) T(*(i + 1));
         }
-        reinterpret_cast<const T *>(data + _size)->~T();
-        return c_iterator(this, pos);
+        reinterpret_cast<const T *>(it)->~T();
+        return it;
+    }
+
+    void clear() {
+        while (!empty()) {
+            pop_back();
+        }
     }
 };
 
